@@ -1,34 +1,4 @@
-<?php
-require_once '../includes/db_connect.php';
-include '../includes/header.php';
 
-
-// Fetch dynamic data
-$menuItems = $conn->query("SELECT * FROM menu_items ORDER BY id DESC LIMIT 4")->fetchAll();
-$gallery = $conn->query("SELECT * FROM gallery ORDER BY id DESC LIMIT 6")->fetchAll();
-$shopReviewsStmt = $conn->prepare("SELECT * FROM reviews WHERE is_shop_review = 1 ORDER BY created_at DESC LIMIT 1000");
-$shopReviewsStmt->execute();
-$shopReviews = $shopReviewsStmt->fetchAll();
-
-// ===== Reviews summary prep =====
-$ratingsCount = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
-$totalReviews = is_array($shopReviews) ? count($shopReviews) : 0;
-$sumRatings = 0;
-
-if ($totalReviews > 0) {
-    foreach ($shopReviews as $r) {
-        $rating = isset($r['rating']) ? (int)$r['rating'] : 0;
-        if ($rating >= 1 && $rating <= 5) {
-            $ratingsCount[$rating]++;
-        $sumRatings += $rating;
-        }
-    }
-}
-
-$averageRating = $totalReviews ? ($sumRatings / $totalReviews) : 0.0;
-
-$settings = $conn->query("SELECT * FROM settings WHERE id = 1")->fetch();
-?>
 
 
 <!DOCTYPE html>
