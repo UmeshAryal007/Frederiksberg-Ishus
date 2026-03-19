@@ -1,0 +1,299 @@
+<?php
+require_once '../includes/db_connect.php';
+include '../includes/header.php';
+
+
+// Fetch dynamic data
+$menuItems = $conn->query("SELECT * FROM menu_items ORDER BY id DESC LIMIT 4")->fetchAll();
+$gallery = $conn->query("SELECT * FROM gallery ORDER BY id DESC LIMIT 6")->fetchAll();
+$shopReviewsStmt = $conn->prepare("SELECT * FROM reviews WHERE is_shop_review = 1 ORDER BY created_at DESC LIMIT 1000");
+$shopReviewsStmt->execute();
+$shopReviews = $shopReviewsStmt->fetchAll();
+
+// ===== Reviews summary prep =====
+$ratingsCount = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+$totalReviews = is_array($shopReviews) ? count($shopReviews) : 0;
+$sumRatings = 0;
+
+if ($totalReviews > 0) {
+    foreach ($shopReviews as $r) {
+        $rating = isset($r['rating']) ? (int)$r['rating'] : 0;
+        if ($rating >= 1 && $rating <= 5) {
+            $ratingsCount[$rating]++;
+        $sumRatings += $rating;
+        }
+    }
+}
+
+$averageRating = $totalReviews ? ($sumRatings / $totalReviews) : 0.0;
+
+$settings = $conn->query("SELECT * FROM settings WHERE id = 1")->fetch();
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><?= htmlspecialchars($settings['shop_name']) ?> | Home</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../admin/assets/css/style.css">
+  <style>
+    
+/* Slider wrapper and animation setup */
+.reviews-slider-wrapper {
+  overflow: hidden;
+  position: relative;
+}
+
+.reviews-slider-track {
+  display: flex;
+  gap: 20px;
+  animation: scrollReviews 120s linear infinite;
+  width: max-content;
+}
+
+/* Each review card */
+.review-card {
+  flex: 0 0 300px;
+}
+
+/* Smooth animation */
+@keyframes scrollReviews {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Optional: Responsive tweak */
+@media (max-width: 768px) {
+  .review-card {
+    flex: 0 0 80%;
+  }
+}
+/* Stats Section */
+    .stats-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 10%;
+        gap: 50px;
+        flex-wrap: wrap;
+        background: linear-gradient(135deg, #fff, #fff);
+    }
+    .stats-image img {
+        max-width: 450px;
+        width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    }
+    .stats-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 40px;
+    }
+    .stat {
+        text-align: left;
+    }
+    .stat h2 {
+        font-size: 2.5rem;
+        color: #d63384;
+        margin-bottom: 5px;
+    }
+    .stat p {
+        font-size: 1rem;
+        color: #555;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .about-section, .stats-section {
+            flex-direction: column;
+            text-align: center;
+        }
+        .stat {
+            text-align: center;
+        }
+    }
+</style>
+
+</head>
+<body>
+
+<!-- Hero Section -->
+<section class="bg-light text-center hero-full" style="background: url('../uploads/menu_images/landing.jpg') no-repeat center center / cover; color: white; box-shadow: inset 0 0 0 2000px rgba(0,0,0,0.4);">
+  <div class="container d-flex flex-column justify-content-center align-items-center h-100">
+    <h1 class="display-3 fw-bold"><?= htmlspecialchars($settings['shop_name']) ?></h1>
+    <p class="lead"><?= htmlspecialchars($settings['about']) ?></p>
+    <a href="#menu" class="btn btn-warning btn-lg mt-3 shadow">🍦 Learn More</a>
+    <div class="scroll-down-indicator mt-3">
+  <a href="#menu" aria-label="Scroll down">
+    <i class="bi bi-chevron-double-down" style="font-size: 2rem; color: white;"></i>
+  </a>
+  </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+ <section class="container my-5 reveal-on-scroll">
+
+<section class="bg-white py-5">
+  <div class="container">
+    <h2 class="text-center mb-4">🖼️ Gallery</h2>
+    <div class="row">
+      <?php foreach ($gallery as $image): ?>
+        <div class="col-6 col-md-4 mb-4">
+  <div class="position-relative shadow rounded overflow-hidden">
+    <span class="position-absolute top-0 start-0 bg-dark text-white px-2 py-1 small rounded-end">
+      <?= htmlspecialchars($image['caption']) ?>
+    </span>
+    <img src="../uploads/gallery_image/<?= htmlspecialchars($image['image_path']) ?>" 
+         alt="<?= htmlspecialchars($image['caption']) ?>" 
+         class="img-fluid rounded w-100"
+         style="height: 250px; object-fit: cover;">
+  </div>
+</div>
+      <?php endforeach; ?>
+    </div>
+    <div class="text-center mt-3">
+        <a href="gallery.php" class="btn btn-outline-primary">View More</a>
+    </div>
+  </div>
+</section>
+</section>
+
+
+<!--Why choose us -->
+<section class="container my-5 reveal-on-scroll" id="menu"  >
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center mb-4">💡 Why Choose <?= htmlspecialchars($settings['shop_name']) ?>?</h2>
+    <div class="row text-center">
+      <div class="col-md-4 mb-3">
+        <h5>Fresh Ingredients</h5>
+        <p>We use only natural and high-quality ingredients.</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5>Homemade Taste</h5>
+        <p>Every scoop is made with love and care.</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5>Fast Pickup</h5>
+        <p>Order online and pick up your treats in minutes.</p>
+      </div>
+    </div>
+  </div>
+ 
+      <!-- Ice Cream Scoop Price Poster -->
+  <section class="poster my-5 mx-auto">
+    <div class="hero">
+      <img src="../assets/img/landing.jpg" alt="Ice Cream Scoop" />
+    </div>
+
+    <div class="pricing">
+      <h1 class="title">Choose your scoops <span>🍦</span></h1>
+      <p class="subtitle">Mix any flavors — pick your favorites!</p>
+
+      <div class="options">
+        <div class="cards">
+          <img src="../assets/img/scoop1.png" alt="1 Scoop" />
+          <div class="count">1 Scoop</div>
+          <div class="price">DKK 20</div>
+          <div class="note">(single flavor)</div>
+        </div>
+
+        <div class="cards">
+          <img src="../assets/img/scoop2.png" alt="2 Scoops" />
+          <div class="count">2 Scoops</div>
+          <div class="price">DKK 35</div>
+          <div class="note">(mix any two)</div>
+        </div>
+
+        <div class="cards">
+          <img src="../assets/img/scoop3.jpg" alt="3 Scoops" />
+          <div class="count">3 Scoops</div>
+          <div class="price">DKK 45</div>
+          <div class="note">(best value)</div>
+        </div>
+        <div class="cards">
+          <img src="../assets/img/scoop4.png" alt="4 Scoops" />
+          <div class="count">4 Scoops</div>
+          <div class="price">DKK 60</div>
+          <div class="note">(best value)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+     </section>
+<!-- Reviews -->
+<section class="bg-light py-5" id="reviews">
+  <div class="container">
+    <h2 class="text-center mb-4">⭐ What Our Customers Say</h2>
+    <div class="row">
+      
+      <!-- Left: Overall rating -->
+      <div class="col-md-4 text-center text-md-start mb-4 mb-md-0">
+        <h1 class="display-4 fw-bold"><?= number_format($averageRating, 1) ?></h1>
+        <div class="text-warning mb-2">
+          <?php for ($i = 1; $i <= 5; $i++): ?>
+            <i class="bi <?= $i <= round($averageRating) ? 'bi-star-fill' : 'bi-star' ?>"></i>
+          <?php endfor; ?>
+        </div>
+        <p class="small text-muted"><?= number_format($totalReviews) ?> reviews</p>
+        
+        <?php for ($star = 5; $star >= 1; $star--): 
+          $percentage = $totalReviews ? ($ratingsCount[$star] / $totalReviews) * 100 : 0;
+        ?>
+          <div class="d-flex align-items-center mb-1">
+            <span class="me-2" style="width: 1.5rem;"><?= $star ?></span>
+            <div class="progress flex-grow-1" style="height: 8px;">
+              <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $percentage ?>%"></div>
+            </div>
+          </div>
+        <?php endfor; ?>
+      </div>
+      
+   <!-- Right: Individual reviews with vertical auto-scroll -->
+<div class="col-md-8">
+  <div class="custom-review-scroll-wrapper">
+    <div class="custom-review-scroll-track">
+      <?php 
+      // Duplicate reviews so it can loop smoothly
+      for ($loop = 0; $loop < 2; $loop++): 
+        foreach ($shopReviews as $review): 
+          $name = htmlspecialchars($review['customer_name']);
+          $avatar_url = "https://ui-avatars.com/api/?name=" . urlencode($name) . "&background=random&rounded=true";
+      ?>
+        <div class="custom-review-box shadow-sm border-0">
+          <div class="d-flex align-items-center mb-2">
+            <img src="<?= $avatar_url ?>" class="rounded-circle me-3" alt="<?= $name ?>">
+            <div>
+              <h6 class="mb-0"><?= $name ?></h6>
+              <div class="text-warning small">
+                <?php for ($i = 1; $i <= 5; $i++): ?>
+                  <i class="bi <?= $i <= $review['rating'] ? 'bi-star-fill' : 'bi-star' ?>"></i>
+                <?php endfor; ?>
+              </div>
+            </div>
+          </div>
+          <p class="card-text small text-muted"><?= nl2br(htmlspecialchars($review['comment'])) ?></p>
+        </div>
+      <?php endforeach; endfor; ?>
+    </div>
+  </div>
+</div>
+
+                </section>
+
+
+<?php include '../includes/footer.php'; ?>
+<script src="../admin/assets/js/home-enhancements.js"></script>
+
+</body>
+</html>

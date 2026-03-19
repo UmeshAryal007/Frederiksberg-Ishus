@@ -1,0 +1,138 @@
+/*
+  home-modern.css
+  Modern styles for the ice cream shop homepage
+  Put this file at: ../admin/assets/css/home-modern.css
+  Add to your <head>:
+  <link rel="stylesheet" href="../admin/assets/css/home-modern.css">
+  (Keep Bootstrap link before this so our rules can override)
+*/
+
+:root{
+  --bg:#0f1724; /* dark navy */
+  --card:#ffffff;
+  --muted:#6b7280;
+  --accent:#ffbe00; /* warm yellow */
+  --accent-2:#ff7aa2; /* pink */
+  --glass: rgba(255,255,255,0.06);
+  --radius: 14px;
+  --container-max:1200px;
+  --page-padding:1.25rem;
+  --shadow-1: 0 6px 18px rgba(2,6,23,0.25);
+}
+
+/* Reset tweaks (keeps Bootstrap but normalizes a bit) */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: #0b1220;
+  background: linear-gradient(180deg,#fbfbfd 0%, #f6f8fb 100%);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+
+.container{max-width:var(--container-max); margin:0 auto; padding:0 var(--page-padding)}
+
+/* Typography */
+h1.display-3{font-weight:800; letter-spacing:-0.02em; font-size:2.25rem}
+.lead{font-size:1.05rem; color:var(--muted)}
+
+/* Hero */
+section.bg-light.text-center.p-5.hero{
+  position:relative;
+  padding:5rem 0;
+  color: #fff;
+  overflow:hidden;
+}
+.hero .overlay{
+  position:absolute; inset:0; z-index:0; background:linear-gradient(120deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35));
+}
+.hero .container{position:relative; z-index:2}
+.hero .btn-warning{background:var(--accent); border:0; color:#111; font-weight:700; padding:0.8rem 1.2rem; border-radius:12px}
+.hero .btn-warning:hover{transform:translateY(-3px); box-shadow:var(--shadow-1)}
+
+/* Menu preview grid */
+#menu .row{display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem}
+@media (max-width: 992px){ #menu .row{grid-template-columns:repeat(2,1fr)} }
+@media (max-width: 576px){ #menu .row{grid-template-columns:1fr} }
+
+.card.h-100{border-radius:var(--radius); overflow:hidden; transition:transform .28s cubic-bezier(.2,.9,.3,1), box-shadow .28s}
+.card.h-100:hover{transform:translateY(-8px); box-shadow: 0 20px 40px rgba(16,24,40,0.12)}
+.card .card-img-top{transition: transform .6s ease;}
+.card.h-100:hover .card-img-top{transform:scale(1.08)}
+.card-body{text-align:center}
+.card-title{font-weight:700; margin-bottom:.35rem}
+.card-text{color:var(--muted)}
+
+/* Price badge */
+.card-body strong{display:inline-block; background:linear-gradient(90deg,var(--accent-2),var(--accent)); color:#111; padding:.35rem .6rem; border-radius:999px; box-shadow:0 6px 18px rgba(255,122,146,0.12)}
+
+/* Why choose us */
+section.py-5.bg-light{padding:3.5rem 0}
+section.py-5.bg-light h2{font-size:1.6rem}
+section.py-5 .row{display:flex; gap:1rem; justify-content:center}
+section.py-5 .col-md-4 h5{font-weight:700}
+
+/* Gallery */
+.bg-white .row{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem}
+@media (max-width:992px){ .bg-white .row{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:576px){ .bg-white .row{grid-template-columns:1fr} }
+.position-relative .position-absolute{opacity:0.96}
+.position-relative img{transition:transform .45s ease; will-change:transform}
+.position-relative:hover img{transform:scale(1.06)}
+
+/* Reviews slider - improved modern look */
+.reviews-slider-wrapper{overflow:hidden; position:relative; padding:1rem 0; --card-gap:20px}
+.reviews-slider-track{display:flex; gap:var(--card-gap); align-items:stretch; animation:scrollReviews 60s linear infinite; width:max-content}
+.review-card{flex:0 0 320px}
+.review-card .card{border-radius:12px; background:linear-gradient(180deg,#fff,#fff);}
+.review-card img{object-fit:cover}
+.review-card .text-warning i{color:#fbbf24}
+
+/* Pause on hover for accessibility */
+.reviews-slider-wrapper:hover .reviews-slider-track{animation-play-state:paused}
+
+/* Make sure the animation loops smoothly by duplicating items in markup (you already do that) */
+@keyframes scrollReviews{
+  0%{ transform:translateX(0) }
+  100%{ transform:translateX(-50%) }
+}
+
+/* Footer adjustments (assumes includes/footer.php uses .footer) */
+.footer{padding:2rem 0; background:transparent; color:var(--muted)}
+.footer a{color:var(--muted)}
+
+/* Utility helpers */
+.shadow-soft{box-shadow: 0 8px 30px rgba(13, 23, 37, 0.08)}
+.rounded-xxl{border-radius:20px}
+.btn-outline-primary{border-radius:12px; padding:.5rem 1rem}
+
+/* Responsive typography */
+@media (min-width:1200px){ h1.display-3{font-size:3rem} }
+
+/* Small screens tweaks */
+@media (max-width:768px){
+  .hero{padding:3rem 0}
+  h1.display-3{font-size:1.6rem}
+}
+
+/* Accessibility: focus outlines for keyboard users */
+a:focus, button:focus{outline:3px solid rgba(255,190,0,0.18); outline-offset:3px}
+
+/* Final gentle tweak to override any inline hero style if needed */
+section.hero-bg{
+  background-size:cover; background-position:center; position:relative; border-radius:0 0 28px 28px; overflow:hidden;
+}
+
+/* Small animation for CTA */
+.cta-pulse{animation:ctaPulse 3.6s ease-in-out infinite}
+@keyframes ctaPulse{ 0%{ transform:scale(1)} 50%{ transform:scale(1.03)} 100%{ transform:scale(1)} }
+
+/* Ensure bootstrap icons used for stars look good */
+.bi{vertical-align:-0.1em}
+
+/* Optional: a light glass card for hero subtitle */
+.hero-sub{display:inline-block; background:rgba(255,255,255,0.06); padding:.45rem .8rem; border-radius:999px; color:rgba(255,255,255,0.92); margin-top:0.6rem}
+
+/* End of file */
